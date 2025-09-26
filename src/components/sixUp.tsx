@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const DEFAULT_URLS = [
   "https://www.youtube.com/watch?v=xKERvEPF898",
@@ -91,6 +91,16 @@ export default function YouTubeSixUp() {
 
   const [urls, setUrls] = useState<string[]>(DEFAULT_URLS);
   const wrapRefs = useRef<(HTMLDivElement | null)[]>(Array(NUM).fill(null));
+  const refCallbacks = useRef<((el: HTMLDivElement | null) => void)[]>([]);
+
+  // Create stable ref callbacks for each index
+  for (let i = 0; i < NUM; i++) {
+    if (!refCallbacks.current[i]) {
+      refCallbacks.current[i] = (el: HTMLDivElement | null) => {
+        wrapRefs.current[i] = el;
+      };
+    }
+  }
   const players = useRef<any[]>(Array(NUM).fill(null));
   const readyFlags = useRef<boolean[]>(Array(NUM).fill(false));
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
@@ -296,7 +306,7 @@ export default function YouTubeSixUp() {
                 style={{ aspectRatio: "16 / 9" }}
               />
               <div
-                ref={(el) => (wrapRefs.current[i] = el)}
+                ref={refCallbacks.current[i]}
                 className="[grid-area:1/1] absolute inset-0"
               />
             </div>
